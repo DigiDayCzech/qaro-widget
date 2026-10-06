@@ -537,7 +537,7 @@
     <div class="pole">
       <label for="f-kod">Kód od ČEZ, odkaz nebo identifikátor obce</label>
       <textarea id="f-kod" rows="5" placeholder='<a href="https://ppo.cezdistribuce.cz/ovm/…/redirect"><img src="https://ppo.cezdistribuce.cz/ovm/…/image/250" …></a>'></textarea>
-      <div class="napoveda">Stačí vložit celý HTML kód, jen jednu z adres, nebo samotný identifikátor (hash). Funguje i starší tvar ovm.bezstavy.cz.</div>
+      <div class="napoveda">Stačí vložit celý HTML kód, jen jednu z adres, nebo samotný identifikátor (hash). Funguje i starší tvar ovm.bezstavy.cz nebo banner.bezstavy.cz, generátor ho sám převede na novou adresu ppo.cezdistribuce.cz.</div>
       <div class="nalezeno" id="nalezeno"></div>
     </div>
 
@@ -577,7 +577,7 @@
       <div id="nahled-box"><iframe id="nahled" title="Náhled banneru"></iframe></div>
     </div>
 
-    <div class="neplatne" id="neplatne">V textu jsem nenašel identifikátor obce. Vlož kód nebo odkaz od ČEZ Distribuce (ppo.cezdistribuce.cz/ovm/… nebo ovm.bezstavy.cz/v1/…).</div>
+    <div class="neplatne" id="neplatne">V textu jsem nenašel identifikátor obce. Vlož kód nebo odkaz od ČEZ Distribuce (ppo.cezdistribuce.cz/ovm/…, ovm.bezstavy.cz/v1/… nebo banner.bezstavy.cz/v1/…).</div>
 
     <div class="vystup">
       <div class="pole">
@@ -652,11 +652,11 @@
   function najdi(text) {
     text = text.trim();
     var m = text.match(/ppo\.cezdistribuce\.cz\/ovm\/([A-Za-z0-9_-]{10,80})/) ||
-            text.match(/ovm\.bezstavy\.cz\/v1\/([A-Za-z0-9_-]{10,80})/) ||
+            text.match(/(?:ovm|banner)\.bezstavy\.cz\/v1\/([A-Za-z0-9_-]{10,80})/) ||
             text.match(/[?&]h=([A-Za-z0-9_-]{10,80})/);   /* URL už hotového banneru */
     var hash = m ? m[1] : (/^[A-Za-z0-9_-]{10,80}$/.test(text) ? text : "");
 
-    var s = text.match(/\/(?:image|b)\/(250|468|728)\b/) || text.match(/[?&]s=(250|468|728)\b/);
+    var s = text.match(/\/(?:image|banner|b)\/(250|468|728)\b/) || text.match(/[?&]s=(250|468|728)\b/);
     return { hash: hash, rozmer: s ? s[1] : "" };
   }
 
