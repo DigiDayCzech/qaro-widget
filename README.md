@@ -32,6 +32,17 @@ Dlouhou URL widgetu jde v generátoru jedním klikem zkrátit na tvar `https://q
 - Světlejší a tmavší odstíny (hover, pozadí loga, rámeček) se dopočítávají z hlavní barvy, barva textu tlačítka se volí automaticky podle kontrastu.
 - Pozadí karty jde změnit: barva (u tmavé se texty automaticky přepnou na světlé) a volitelný obrázek přes celou kartu (cover) s nastavitelnou opacity, skrz kterou prosvítá barva pozadí.
 
+## Generátor ČEZ odstávek
+
+- Generátor: https://digidayczech.github.io/qaro-widget/cez/
+- Renderer: `…/qaro-widget/cez/w/?h=<identifikátor obce>&s=<250|468|728>`
+
+Obec dostane od ČEZ Distribuce kód banneru „Plánované odstávky" (`ppo.cezdistribuce.cz/ovm/<hash>/redirect` + `/image/<rozměr>`, starší tvar `ovm.bezstavy.cz/v1/<hash>/…`). Do generátoru se vloží celý kód, jedna z adres nebo jen hash, vybere se rozměr a URL se dá do iframe modulu v QARO.
+
+- Renderer je jen obal: odkaz `…/redirect` (target `_blank`) a obrázek `…/image/<rozměr>`. Obsah banneru generuje ČEZ živě pro danou lokalitu (`Cache-Control: no-store`), otevřená stránka ho každých 15 minut obnoví.
+- ČEZ nabízí jen rozměry 250 × 250, 468 × 60 a 728 × 90. Výška iframe = výška banneru + 4 px. V užším iframe se banner poměrově zmenší.
+- Krátký odkaz funguje stejně jako u widgetů.
+
 ## Limity
 
 - Logo musí být veřejně dostupný obrázek (URL), soubor nejde nahrát.

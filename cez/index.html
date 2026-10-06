@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Montserrat:wght@300&display=swap" rel="stylesheet">
-<title>Generátor widgetů | DigiDay</title>
+<title>Generátor ČEZ odstávek | DigiDay</title>
 <style>
 
   /* ── QARO / DigiDay vizuál (zhodný s QARO SMS a importerem) ──
@@ -443,25 +443,57 @@
     text-align: center;
   }
 
+
+  /* ---------- ČEZ generátor ---------- */
+
+  .pole select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--bdr);
+    border-radius: 10px;
+    font: inherit;
+    font-size: .9rem;
+    color: var(--txt);
+    background: var(--sur2);
+  }
+  .pole select:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 4px var(--pink-dim); }
+  .pole select option { background: var(--sur-solid); color: var(--txt); }
+
+  .rozmer-volby { display: flex; gap: 8px; flex-wrap: wrap; }
+  .rozmer-volby label {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border: 1px solid var(--bdr); border-radius: 10px;
+    background: var(--sur2); color: var(--txt); font-size: .85rem; font-weight: 500;
+    cursor: pointer; margin: 0;
+  }
+  .rozmer-volby label:has(input:checked) { border-color: var(--pink); box-shadow: 0 0 0 3px var(--pink-dim); }
+  .rozmer-volby input { accent-color: var(--pink); }
+
+  .nalezeno { margin-top: 6px; font-size: .78rem; color: var(--cyan); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+
+  .postup { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--bdr); font-size: .82rem; color: var(--txt2); }
+  .postup ol { padding-left: 18px; }
+  .postup li { margin-bottom: 4px; }
+  .postup a { color: var(--cyan); }
+
 </style>
 </head>
 <body>
-
 <script>try{var t=localStorage.getItem("qaro-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
 
 <div class="shell">
 
 <aside class="sidebar">
-  <a class="logo" href="./">
-    <img src="logo-qaro.svg" alt="QARO">
+  <a class="logo" href="../">
+    <img src="../logo-qaro.svg" alt="QARO">
     <span>WIDGETY</span>
   </a>
   <nav>
-    <a class="navlink aktivni" href="./">
+    <a class="navlink" href="../">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
       <span class="popisek">Generátor</span>
     </a>
-    <a class="navlink" href="cez/">
+    <a class="navlink aktivni" href="./">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       <span class="popisek">ČEZ odstávky</span>
     </a>
@@ -493,96 +525,47 @@
 
   <header class="hlavicka">
     <div class="eyebrow">DIGIDAY / INTERNAL</div>
-    <h1>Generátor <span>widgetů</span></h1>
-    <p>Vyplň formulář, zkopíruj URL a vlož ji do iframe modulu v QARO. Nic dalšího není potřeba, widget se publikuje sám přes URL.</p>
+    <h1>Generátor <span>ČEZ odstávek</span></h1>
+    <p>Vlož kód banneru, který obec dostala od ČEZ Distribuce, vyber rozměr a URL dej do iframe modulu v QARO. Banner je živý, ČEZ ho generuje pro danou lokalitu pokaždé znovu podle aktuálně plánovaných odstávek.</p>
   </header>
-
 
 <main>
   <!-- ================= FORMULÁŘ ================= -->
   <section class="panel">
-    <h2>Obsah widgetu</h2>
+    <h2>Banner obce</h2>
 
     <div class="pole">
-      <label for="f-title">Název</label>
-      <input type="text" id="f-title" placeholder="Střední škola polytechnická Hustopeče">
+      <label for="f-kod">Kód od ČEZ, odkaz nebo identifikátor obce</label>
+      <textarea id="f-kod" rows="5" placeholder='<a href="https://ppo.cezdistribuce.cz/ovm/…/redirect"><img src="https://ppo.cezdistribuce.cz/ovm/…/image/250" …></a>'></textarea>
+      <div class="napoveda">Stačí vložit celý HTML kód, jen jednu z adres, nebo samotný identifikátor (hash). Funguje i starší tvar ovm.bezstavy.cz.</div>
+      <div class="nalezeno" id="nalezeno"></div>
     </div>
 
     <div class="pole">
-      <label for="f-subtitle">Podtitulek <span class="nepovinne">(nepovinné)</span></label>
-      <input type="text" id="f-subtitle" placeholder="příspěvková organizace">
+      <label for="f-obec">Název obce <span class="nepovinne">(nepovinné, jen do titulku iframe)</span></label>
+      <input type="text" id="f-obec" placeholder="Markvartice">
     </div>
 
     <div class="pole">
-      <label for="f-desc">Popis <span class="nepovinne">(nepovinné, max. 2 řádky)</span></label>
-      <textarea id="f-desc" rows="2" placeholder="Krátký doplňující text."></textarea>
-    </div>
-
-    <div class="pole">
-      <label for="f-url">Adresa, kam widget odkazuje</label>
-      <input type="url" id="f-url" placeholder="https://hustopecess.edupage.org/">
-      <div class="napoveda">Otevře se v novém okně.</div>
-    </div>
-
-    <div class="radek">
-      <div class="pole">
-        <label for="f-btn">Text tlačítka</label>
-        <input type="text" id="f-btn" placeholder="Přejít na web">
+      <label>Rozměr banneru</label>
+      <div class="rozmer-volby">
+        <label><input type="radio" name="rozmer" value="250" checked> 250 × 250</label>
+        <label><input type="radio" name="rozmer" value="468"> 468 × 60</label>
+        <label><input type="radio" name="rozmer" value="728"> 728 × 90</label>
       </div>
-      <div class="pole">
-        <label for="f-note">Poznámka pod tlačítkem <span class="nepovinne">(nepovinné)</span></label>
-        <input type="text" id="f-note" placeholder="Odkaz se otevře v novém okně.">
-      </div>
-    </div>
-
-    <div class="pole">
-      <label for="f-logo">Logo, adresa obrázku <span class="nepovinne">(nepovinné)</span></label>
-      <input type="url" id="f-logo" placeholder="https://…/logo.png">
-      <div class="napoveda">Když zůstane prázdné, widget bude bez loga. U EduPage škol bývá logo v HTML stránky na adrese static.edupage.org.</div>
-    </div>
-
-    <div class="pole">
-      <label for="f-color-hex">Hlavní barva</label>
-      <div class="barva-radek">
-        <input type="color" id="f-color" value="#00a2e8">
-        <input type="text" id="f-color-hex" value="#00a2e8">
-      </div>
-      <div class="napoveda">Světlejší a tmavší odstíny si widget dopočítá sám.</div>
-    </div>
-
-    <div class="pole">
-      <label for="f-bg-hex">Barva pozadí karty</label>
-      <div class="barva-radek">
-        <input type="color" id="f-bg" value="#ffffff">
-        <input type="text" id="f-bg-hex" value="#ffffff">
-      </div>
-      <div class="napoveda">U tmavého pozadí se texty widgetu automaticky přepnou na světlé.</div>
-    </div>
-
-    <div class="pole">
-      <label for="f-bgimg">Obrázek na pozadí karty <span class="nepovinne">(nepovinné)</span></label>
-      <input type="url" id="f-bgimg" placeholder="https://…/fotka.jpg">
-      <div class="napoveda">Roztáhne se přes celou kartu (cover). Musí to být veřejně dostupný obrázek.</div>
-    </div>
-
-    <div class="pole">
-      <label for="f-opacity">Opacity obrázku: <span id="opacity-hodnota">100&nbsp;%</span></label>
-      <input type="range" id="f-opacity" min="0" max="100" value="100">
-      <div class="napoveda">Menší hodnota, průhlednější obrázek. Prosvítá skrz něj barva pozadí karty, texty tak zůstanou čitelné.</div>
+      <div class="napoveda">Jiné rozměry ČEZ nenabízí. Pokud iframe bude užší, banner se poměrově zmenší.</div>
     </div>
 
     <div class="tlacitka">
-      <button type="button" class="primarni" id="b-vzor">Vyplnit vzorová data</button>
-      <button type="button" id="b-reset">Nový widget</button>
+      <button type="button" id="b-reset">Nový banner</button>
     </div>
 
-    <div class="nacist">
-      <div class="pole">
-        <label for="f-import">Upravit existující widget</label>
-        <input type="text" id="f-import" placeholder="Sem vlož URL hotového widgetu">
-        <div class="napoveda">Formulář se předvyplní podle vložené URL.</div>
-      </div>
-      <button type="button" id="b-import">Načíst do formuláře</button>
+    <div class="postup">
+      <ol>
+        <li>Obec si kód banneru vygeneruje v portálu ČEZ Distribuce pro obce (OVM), případně ho pošle e-mailem.</li>
+        <li>Kód vlož sem, vyber rozměr a zkopíruj URL.</li>
+        <li>V QARO přidej iframe modul s touto URL a výškou podle rozměru banneru.</li>
+      </ol>
     </div>
   </section>
 
@@ -590,34 +573,22 @@
   <section class="panel nahled-panel">
     <h2>Náhled</h2>
 
-    <div class="rozmery">
-      <div class="pole">
-        <label for="f-w">Šířka náhledu</label>
-        <input type="number" id="f-w" value="1188" min="200" max="2400">
-      </div>
-      <div class="pole">
-        <label for="f-h">Výška iframe</label>
-        <input type="number" id="f-h" value="175" min="80" max="1200">
-      </div>
-      <label class="fit-prepinac"><input type="checkbox" id="f-fit" checked> Zmenšit náhled na šířku okna</label>
-    </div>
-
     <div class="nahled-plocha">
-      <div id="nahled-box"><iframe id="nahled" title="Náhled widgetu"></iframe></div>
+      <div id="nahled-box"><iframe id="nahled" title="Náhled banneru"></iframe></div>
     </div>
 
-    <div class="neplatne" id="neplatne">Aby šel widget publikovat, vyplň aspoň název a adresu (musí začínat na http:// nebo https://).</div>
+    <div class="neplatne" id="neplatne">V textu jsem nenašel identifikátor obce. Vlož kód nebo odkaz od ČEZ Distribuce (ppo.cezdistribuce.cz/ovm/… nebo ovm.bezstavy.cz/v1/…).</div>
 
     <div class="vystup">
       <div class="pole">
-        <label for="o-url">URL widgetu, tu vlož do iframe modulu v QARO</label>
+        <label for="o-url">URL banneru, tu vlož do iframe modulu v QARO</label>
         <input type="text" id="o-url" readonly>
         <button type="button" class="kopirovat" data-cil="o-url">Kopírovat</button>
-        <div class="delka" id="o-delka"></div>
+        <div class="delka" id="o-rozmer"></div>
       </div>
 
       <div class="pole">
-        <label for="o-short">Krátký odkaz <span class="nepovinne">(hodí se tam, kde je dlouhá URL nepraktická)</span></label>
+        <label for="o-short">Krátký odkaz <span class="nepovinne">(nepovinné)</span></label>
         <input type="text" id="o-short" readonly placeholder="Vytvoří se tlačítkem níže">
         <button type="button" class="kopirovat" data-cil="o-short">Kopírovat</button>
         <div class="short-radek">
@@ -635,7 +606,7 @@
   </section>
 </main>
 
-<footer>DigiDay, interní nástroj. Widget se nikam neukládá, celá jeho podoba je zakódovaná v URL.</footer>
+<footer>DigiDay, interní nástroj. Nic se nikam neukládá, identifikátor obce je přímo v URL a obsah banneru dodává živě ČEZ Distribuce.</footer>
 
   </div><!-- /obsah-inner -->
 </div><!-- /obsah -->
@@ -660,224 +631,131 @@
 })();
 </script>
 
-
 <script>
 (function () {
   "use strict";
 
-  /* ---------- base64url kódování ---------- */
-
-  function strToB64u(s) {
-    var bytes = new TextEncoder().encode(s);
-    var bin = "";
-    bytes.forEach(function (b) { bin += String.fromCharCode(b); });
-    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-
-  function b64uToStr(s) {
-    s = s.replace(/-/g, "+").replace(/_/g, "/");
-    while (s.length % 4) s += "=";
-    var bin = atob(s);
-    var bytes = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-  }
-
-  /* ---------- prvky ---------- */
-
   var $ = function (id) { return document.getElementById(id); };
-  var pole = {
-    t: $("f-title"), s: $("f-subtitle"), d: $("f-desc"), u: $("f-url"),
-    b: $("f-btn"), n: $("f-note"), l: $("f-logo")
-  };
-  var barva = $("f-color"), barvaHex = $("f-color-hex");
-  var pozadi = $("f-bg"), pozadiHex = $("f-bg-hex");
-  var bgImg = $("f-bgimg"), opacity = $("f-opacity"), opacityHodnota = $("opacity-hodnota");
-  var sirka = $("f-w"), vyska = $("f-h");
-  var nahled = $("nahled"), neplatne = $("neplatne");
-  var oUrl = $("o-url"), oIframe = $("o-iframe"), oDelka = $("o-delka");
+  var kod = $("f-kod"), obec = $("f-obec");
+  var nahled = $("nahled"), neplatne = $("neplatne"), nalezeno = $("nalezeno");
+  var oUrl = $("o-url"), oIframe = $("o-iframe"), oRozmer = $("o-rozmer");
   var oShort = $("o-short"), bShort = $("b-short"), shortStav = $("short-stav");
 
-  /* API zkracovače běží na Vercelu, generátor může běžet i na GitHub Pages */
   var API_SHORTEN = "https://qaro-widget.vercel.app/api/shorten";
-  var zkracenaZ = "";   /* dlouhá URL, ke které patří aktuální krátký odkaz */
+  var zkracenaZ = "";
 
-  var VZOR = {
-    t: "Střední škola polytechnická Hustopeče",
-    s: "příspěvková organizace",
-    d: "",
-    u: "https://hustopecess.edupage.org/",
-    b: "Přejít na EduPage",
-    n: "Odkaz se otevře v novém okně.",
-    l: "https://static.edupage.org/global/pics/skins/logo/ifxb43dbb6849b50276_g.png",
-    c: "#00a2e8"
-  };
+  var ROZMERY = { "250": [250, 250], "468": [468, 60], "728": [728, 90] };
+  var ULOZENI = "qaro-cez-form";
 
-  var VYCHOZI_BTN = "Přejít na web";
+  /* ---------- rozpoznání vstupu ---------- */
 
-  /* ---------- čtení a zápis formuláře ---------- */
+  function najdi(text) {
+    text = text.trim();
+    var m = text.match(/ppo\.cezdistribuce\.cz\/ovm\/([A-Za-z0-9_-]{10,80})/) ||
+            text.match(/ovm\.bezstavy\.cz\/v1\/([A-Za-z0-9_-]{10,80})/) ||
+            text.match(/[?&]h=([A-Za-z0-9_-]{10,80})/);   /* URL už hotového banneru */
+    var hash = m ? m[1] : (/^[A-Za-z0-9_-]{10,80}$/.test(text) ? text : "");
 
-  function cfgZFormulare() {
-    var cfg = { v: 1 };
-    Object.keys(pole).forEach(function (k) {
-      var v = pole[k].value.trim();
-      if (v) cfg[k] = v;
-    });
-    var c = barvaHex.value.trim().toLowerCase();
-    if (/^#[0-9a-f]{6}$/.test(c) && c !== "#00a2e8") cfg.c = c;
-
-    var k = pozadiHex.value.trim().toLowerCase();
-    if (/^#[0-9a-f]{6}$/.test(k) && k !== "#ffffff") cfg.k = k;
-
-    var p = bgImg.value.trim();
-    if (p) {
-      cfg.p = p;
-      var o = parseInt(opacity.value, 10);
-      if (!isNaN(o) && o >= 0 && o < 100) cfg.o = o;
-    }
-    return cfg;
+    var s = text.match(/\/(?:image|b)\/(250|468|728)\b/) || text.match(/[?&]s=(250|468|728)\b/);
+    return { hash: hash, rozmer: s ? s[1] : "" };
   }
 
-  function cfgDoFormulare(cfg) {
-    Object.keys(pole).forEach(function (k) {
-      pole[k].value = typeof cfg[k] === "string" ? cfg[k] : "";
-    });
-    var c = (typeof cfg.c === "string" && /^#[0-9a-f]{6}$/i.test(cfg.c)) ? cfg.c.toLowerCase() : "#00a2e8";
-    barva.value = c;
-    barvaHex.value = c;
-
-    var k = (typeof cfg.k === "string" && /^#[0-9a-f]{6}$/i.test(cfg.k)) ? cfg.k.toLowerCase() : "#ffffff";
-    pozadi.value = k;
-    pozadiHex.value = k;
-
-    bgImg.value = typeof cfg.p === "string" ? cfg.p : "";
-    var o = parseInt(cfg.o, 10);
-    opacity.value = (!isNaN(o) && o >= 0 && o <= 100) ? o : 100;
-    opacityHodnota.textContent = opacity.value + " %";
+  function rozmer() {
+    return document.querySelector('input[name="rozmer"]:checked').value;
   }
 
-  /* ---------- sestavení URL widgetu ---------- */
-
-  function widgetBase() {
-    /* generátor je na …/qaro-widget/, widget na …/qaro-widget/w/ */
-    return new URL("w/", location.href).href;
-  }
-
-  function widgetUrl(cfg) {
-    return widgetBase() + "?c=" + strToB64u(JSON.stringify(cfg));
+  function nastavRozmer(s) {
+    var r = document.querySelector('input[name="rozmer"][value="' + s + '"]');
+    if (r) r.checked = true;
   }
 
   function escapeAttr(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
   }
 
-  /* ---------- překreslení náhledu a výstupů ---------- */
+  function bannerUrl(hash, s) {
+    return new URL("w/", location.href).href + "?h=" + encodeURIComponent(hash) + "&s=" + s;
+  }
 
-  var casovac = null;
+  /* ---------- překreslení ---------- */
+
+  var posledniKod = null;
 
   function prekresli() {
-    var cfg = cfgZFormulare();
-    var w = parseInt(sirka.value, 10) || 1188;
-    var h = parseInt(vyska.value, 10) || 175;
-    nahled.style.width = w + "px";
-    nahled.style.height = h + "px";
+    var nalez = najdi(kod.value);
 
-    /* zmenšení náhledu, aby se vešel na šířku panelu */
+    /* rozměr z vloženého kódu převezmi jen když se kód změnil, ruční volbu nepřepisuj */
+    if (kod.value !== posledniKod) {
+      if (nalez.rozmer) nastavRozmer(nalez.rozmer);
+      posledniKod = kod.value;
+    }
+
+    var s = rozmer();
+    var w = ROZMERY[s][0], h = ROZMERY[s][1];   /* iframe dostane h + 4 px, aby nevznikl scrollbar */
+    var platne = !!nalez.hash;
+
+    neplatne.style.display = (platne || !kod.value.trim()) ? "none" : "block";
+    nalezeno.textContent = platne ? "Identifikátor obce: " + nalez.hash : "";
+
+    nahled.style.width = w + "px";
+    nahled.style.height = (h + 4) + "px";
     var box = $("nahled-box");
-    var plocha = box.parentElement;
-    var dostupna = plocha.clientWidth - 28;      /* padding plochy 2x14 */
-    var scale = ($("f-fit").checked && dostupna > 0 && w > dostupna) ? dostupna / w : 1;
+    var dostupna = box.parentElement.clientWidth - 28;
+    var scale = (dostupna > 0 && w > dostupna) ? dostupna / w : 1;
     nahled.style.transform = scale === 1 ? "none" : "scale(" + scale + ")";
     box.style.width = Math.round(w * scale) + "px";
-    box.style.height = Math.round(h * scale) + "px";
-
-    var platne = cfg.t && cfg.u && /^https?:\/\//i.test(cfg.u);
-    neplatne.style.display = platne ? "none" : "block";
-
-    var url = widgetUrl(cfg);
-    try {
-      nahled.contentWindow.location.replace(url);   /* replace nezanáší historii prohlížeče */
-    } catch (e) {
-      nahled.src = url;
-    }
+    box.style.height = Math.round((h + 4) * scale) + "px";
 
     if (platne) {
+      var url = bannerUrl(nalez.hash, s);
+      if (nahled.dataset.url !== url) {
+        nahled.dataset.url = url;
+        try { nahled.contentWindow.location.replace(url); } catch (e) { nahled.src = url; }
+      }
+      var titulek = "ČEZ Distribuce – Plánované odstávky" + (obec.value.trim() ? ", " + obec.value.trim() : "");
       oUrl.value = url;
-      oIframe.value = '<iframe src="' + escapeAttr(url) + '" width="100%" height="' + h +
-        '" style="border:0" loading="lazy" title="' + escapeAttr(cfg.t) + '"></iframe>';
-      oDelka.textContent = "Délka URL: " + url.length + " znaků";
-      oDelka.className = "delka" + (url.length > 2000 ? " varovani" : "");
-      if (url.length > 2000) oDelka.textContent += ", zkrať texty, některé systémy tak dlouhou URL nevezmou";
+      oIframe.value = '<iframe src="' + escapeAttr(url) + '" width="' + w + '" height="' + (h + 4) +
+        '" style="border:0;max-width:100%" loading="lazy" title="' + escapeAttr(titulek) + '"></iframe>';
+      oRozmer.textContent = "Doporučená výška iframe modulu: " + (h + 4) + " px (banner " + w + " × " + h + ").";
     } else {
+      nahled.dataset.url = "";
+      try { nahled.contentWindow.location.replace("about:blank"); } catch (e) { nahled.src = "about:blank"; }
       oUrl.value = "";
       oIframe.value = "";
-      oDelka.textContent = "";
+      oRozmer.textContent = "";
     }
 
-    /* krátký odkaz patří ke konkrétní URL, po změně widgetu už neplatí */
     if (oUrl.value !== zkracenaZ) {
       oShort.value = "";
       shortStav.textContent = "";
     }
     bShort.disabled = !platne;
 
-    try { localStorage.setItem("qaro-widget-form", JSON.stringify(cfg)); } catch (e) {}
+    try { localStorage.setItem(ULOZENI, JSON.stringify({ k: kod.value, o: obec.value, s: s })); } catch (e) {}
   }
 
+  var casovac = null;
   function naplanuj() {
     clearTimeout(casovac);
-    casovac = setTimeout(prekresli, 250);
+    casovac = setTimeout(prekresli, 200);
   }
 
   /* ---------- události ---------- */
 
-  Object.keys(pole).forEach(function (k) { pole[k].addEventListener("input", naplanuj); });
-  sirka.addEventListener("input", naplanuj);
-  vyska.addEventListener("input", naplanuj);
-  $("f-fit").addEventListener("change", prekresli);
+  kod.addEventListener("input", naplanuj);
+  obec.addEventListener("input", naplanuj);
+  document.querySelectorAll('input[name="rozmer"]').forEach(function (r) {
+    r.addEventListener("change", prekresli);
+  });
   window.addEventListener("resize", naplanuj);
 
-  barva.addEventListener("input", function () { barvaHex.value = barva.value; naplanuj(); });
-  barvaHex.addEventListener("input", function () {
-    var v = barvaHex.value.trim();
-    if (/^#[0-9a-f]{6}$/i.test(v)) barva.value = v.toLowerCase();
-    naplanuj();
-  });
-
-  pozadi.addEventListener("input", function () { pozadiHex.value = pozadi.value; naplanuj(); });
-  pozadiHex.addEventListener("input", function () {
-    var v = pozadiHex.value.trim();
-    if (/^#[0-9a-f]{6}$/i.test(v)) pozadi.value = v.toLowerCase();
-    naplanuj();
-  });
-
-  bgImg.addEventListener("input", naplanuj);
-  opacity.addEventListener("input", function () {
-    opacityHodnota.textContent = opacity.value + " %";
-    naplanuj();
-  });
-
-  $("b-vzor").addEventListener("click", function () {
-    cfgDoFormulare(VZOR);
-    prekresli();
-  });
-
   $("b-reset").addEventListener("click", function () {
-    cfgDoFormulare({ b: VYCHOZI_BTN, n: "Odkaz se otevře v novém okně." });
-    try { localStorage.removeItem("qaro-widget-form"); } catch (e) {}
+    kod.value = "";
+    obec.value = "";
+    nastavRozmer("250");
+    try { localStorage.removeItem(ULOZENI); } catch (e) {}
     prekresli();
-  });
-
-  $("b-import").addEventListener("click", function () {
-    var m = $("f-import").value.match(/[?&]c=([A-Za-z0-9_-]+)/);
-    if (!m) { alert("V téhle URL není konfigurace widgetu."); return; }
-    try {
-      cfgDoFormulare(JSON.parse(b64uToStr(m[1])));
-      $("f-import").value = "";
-      prekresli();
-    } catch (e) {
-      alert("Konfiguraci z URL se nepodařilo přečíst.");
-    }
+    kod.focus();
   });
 
   bShort.addEventListener("click", function () {
@@ -926,20 +804,24 @@
     });
   });
 
-  /* ---------- start: ?c= v URL > uložený formulář > vzor ---------- */
+  /* ---------- start: ?h= v URL > uložený formulář ---------- */
 
-  var start = null;
-  var m = location.search.match(/[?&]c=([A-Za-z0-9_-]+)/);
-  if (m) {
-    try { start = JSON.parse(b64uToStr(m[1])); } catch (e) {}
+  var q = new URLSearchParams(location.search);
+  if (q.get("h")) {
+    kod.value = q.get("h");
+    nastavRozmer(q.get("s") || "250");
+    posledniKod = kod.value;
+  } else {
+    try {
+      var ulozene = JSON.parse(localStorage.getItem(ULOZENI));
+      if (ulozene) {
+        kod.value = ulozene.k || "";
+        obec.value = ulozene.o || "";
+        nastavRozmer(ulozene.s || "250");
+        posledniKod = kod.value;
+      }
+    } catch (e) {}
   }
-  if (!start) {
-    try { start = JSON.parse(localStorage.getItem("qaro-widget-form")); } catch (e) {}
-  }
-  if (!start || typeof start !== "object" || (!start.t && !start.u)) {
-    start = VZOR;
-  }
-  cfgDoFormulare(start);
   prekresli();
 })();
 </script>

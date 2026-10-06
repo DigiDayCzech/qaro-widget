@@ -2,9 +2,10 @@ import { put } from "@vercel/blob";
 import { createHash } from "node:crypto";
 
 /* Zkracovat jde jen URL našeho widget rendereru, nic jiného. */
+const ZAKLADY = String.raw`https:\/\/(?:(?:dominikdigiday|digidayczech)\.github\.io\/qaro-widget|qaro-widget[a-z0-9-]*\.vercel\.app)`;
 const POVOLENE = [
-  /^https:\/\/dominikdigiday\.github\.io\/qaro-widget\/w\/\?c=[A-Za-z0-9_-]+$/,
-  /^https:\/\/qaro-widget[a-z0-9-]*\.vercel\.app\/w\/\?c=[A-Za-z0-9_-]+$/
+  new RegExp(`^${ZAKLADY}\\/w\\/\\?c=[A-Za-z0-9_-]+$`),
+  new RegExp(`^${ZAKLADY}\\/cez\\/w\\/\\?h=[A-Za-z0-9_-]{10,80}&s=(?:250|468|728)$`)   /* ČEZ odstávky */
 ];
 
 export default async function handler(req, res) {
