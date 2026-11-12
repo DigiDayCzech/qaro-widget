@@ -4,25 +4,27 @@
    data-open="true" = okno sa otvorí hneď po načítaní stránky (na mobile nie, tam by zakrylo celý web).
    data-position="inline" = tlačidlo s textom sa vykreslí presne tam, kde je vložený script, okno sa otvorí absolútne pod ním.
    data-offset="40" = pri inline posunie tlačidlo o 40 px nižšie (záporné číslo vyššie).
-   data-target="form[name=global_search_form]" = pri inline vloží tlačidlo hneď za tento prvok (keď je script v hlavičke webu). */
+   data-target="form[name=global_search_form]" = pri inline vloží tlačidlo hneď za tento prvok (keď je script v hlavičke webu).
+   data-text-color="#000" = farba textu a ikon na tlačidle a v hlavičke okna (predvolene biela). */
 (function () {
   var s = document.currentScript;
   if (!s || !s.dataset.url) return;
   var URL = s.dataset.url;
   var LABEL = s.dataset.label || "Otevřít";
   var COLOR = s.dataset.color || "#1f1545";
+  var TEXT = s.dataset.textColor || "#fff";
   var side = (s.dataset.position || "bottom-left").indexOf("right") > -1 ? "right" : "left";
   var inline = s.dataset.position === "inline";
   var id = "qwv" + Math.random().toString(36).slice(2, 7);
 
   var css = document.createElement("style");
   css.textContent =
-    "." + id + "-b{position:fixed;" + side + ":20px;bottom:20px;z-index:2147483000;width:56px;height:56px;border-radius:50%;border:0;background:" + COLOR + ";color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}" +
+    "." + id + "-b{position:fixed;" + side + ":20px;bottom:20px;z-index:2147483000;width:56px;height:56px;border-radius:50%;border:0;background:" + COLOR + ";color:" + TEXT + ";cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}" +
     "." + id + "-b:focus-visible{outline:3px solid #ffbf47;outline-offset:2px}" +
     "." + id + "-p{position:fixed;" + side + ":20px;bottom:86px;z-index:2147483001;width:400px;height:600px;max-height:calc(100vh - 106px);background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.35);display:none;flex-direction:column;overflow:hidden}" +
     "." + id + "-p.open{display:flex}" +
-    "." + id + "-h{display:flex;align-items:center;gap:8px;padding:10px 12px;background:" + COLOR + ";color:#fff;font:600 15px/1.2 sans-serif}" +
-    "." + id + "-h span{flex:1}." + id + "-h a,." + id + "-h button{color:#fff;background:none;border:0;cursor:pointer;font-size:20px;line-height:1;text-decoration:none;padding:2px 6px}" +
+    "." + id + "-h{display:flex;align-items:center;gap:8px;padding:10px 12px;background:" + COLOR + ";color:" + TEXT + ";font:600 15px/1.2 sans-serif}" +
+    "." + id + "-h span{flex:1}." + id + "-h a,." + id + "-h button{color:" + TEXT + ";background:none;border:0;cursor:pointer;font-size:20px;line-height:1;text-decoration:none;padding:2px 6px}" +
     "." + id + "-p iframe{flex:1;width:100%;border:0}" +
     "." + id + "-w{position:relative;display:inline-block;text-align:left}" +
     "." + id + "-w ." + id + "-b{position:static;width:auto;height:auto;border-radius:999px;padding:12px 22px;gap:8px;font:600 16px/1.2 sans-serif}" +
