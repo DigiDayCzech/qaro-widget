@@ -3,7 +3,8 @@
      data-url="https://..." data-position="bottom-left" data-color="#1f1545" data-label="Otevřít" data-open="true"></script>
    data-open="true" = okno sa otvorí hneď po načítaní stránky (na mobile nie, tam by zakrylo celý web).
    data-position="inline" = tlačidlo s textom sa vykreslí presne tam, kde je vložený script, okno sa otvorí absolútne pod ním.
-   data-offset="40" = pri inline posunie tlačidlo o 40 px nižšie (záporné číslo vyššie). */
+   data-offset="40" = pri inline posunie tlačidlo o 40 px nižšie (záporné číslo vyššie).
+   data-target="form[name=global_search_form]" = pri inline vloží tlačidlo hneď za tento prvok (keď je script v hlavičke webu). */
 (function () {
   var s = document.currentScript;
   if (!s || !s.dataset.url) return;
@@ -74,9 +75,10 @@
       box.style.textAlign = "center";
       box.style.marginTop = (parseInt(s.dataset.offset, 10) || 0) + "px";
       box.appendChild(w);
-      s.parentNode.insertBefore(box, s);
+      var t = s.dataset.target && document.querySelector(s.dataset.target);
+      if (t) t.insertAdjacentElement("afterend", box); else s.parentNode.insertBefore(box, s);
     } else { document.body.appendChild(btn); document.body.appendChild(panel); }
     if (s.dataset.open === "true" && window.innerWidth > 600) toggle(true);
   }
-  if (inline || document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
+  if (s.dataset.target ? document.readyState !== "loading" : (inline || document.body)) mount(); else document.addEventListener("DOMContentLoaded", mount);
 })();
