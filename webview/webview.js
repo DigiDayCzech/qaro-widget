@@ -1,7 +1,8 @@
 /* QARO webview: plávajúce tlačidlo + okno s iframe.
    <script src="https://digidayczech.github.io/qaro-widget/webview/webview.js"
      data-url="https://..." data-position="bottom-left" data-color="#1f1545" data-label="Otevřít" data-open="true"></script>
-   data-open="true" = okno sa otvorí hneď po načítaní stránky (na mobile nie, tam by zakrylo celý web). */
+   data-open="true" = okno sa otvorí hneď po načítaní stránky (na mobile nie, tam by zakrylo celý web).
+   data-position="inline" = tlačidlo s textom sa vykreslí presne tam, kde je vložený script, okno sa otvorí absolútne pod ním. */
 (function () {
   var s = document.currentScript;
   if (!s || !s.dataset.url) return;
@@ -9,6 +10,7 @@
   var LABEL = s.dataset.label || "Otevřít";
   var COLOR = s.dataset.color || "#1f1545";
   var side = (s.dataset.position || "bottom-left").indexOf("right") > -1 ? "right" : "left";
+  var inline = s.dataset.position === "inline";
   var id = "qwv" + Math.random().toString(36).slice(2, 7);
 
   var css = document.createElement("style");
@@ -20,6 +22,10 @@
     "." + id + "-h{display:flex;align-items:center;gap:8px;padding:10px 12px;background:" + COLOR + ";color:#fff;font:600 15px/1.2 sans-serif}" +
     "." + id + "-h span{flex:1}." + id + "-h a,." + id + "-h button{color:#fff;background:none;border:0;cursor:pointer;font-size:20px;line-height:1;text-decoration:none;padding:2px 6px}" +
     "." + id + "-p iframe{flex:1;width:100%;border:0}" +
+    "." + id + "-w{position:relative;display:inline-block;text-align:left}" +
+    "." + id + "-w ." + id + "-b{position:static;width:auto;height:auto;border-radius:999px;padding:12px 22px;gap:8px;font:600 16px/1.2 sans-serif}" +
+    "." + id + "-w ." + id + "-p{position:absolute;left:50%;right:auto;top:calc(100% + 10px);bottom:auto;transform:translateX(-50%);max-height:none}" +
+    "@media(max-width:600px){." + id + "-w ." + id + "-p{position:fixed;transform:none;left:0;right:0;top:0;bottom:0;width:auto;height:auto}}" +
     "@media(max-width:600px){." + id + "-p{left:0;right:0;top:0;bottom:0;width:auto;height:auto;max-height:none;border-radius:0}}";
   document.head.appendChild(css);
 
@@ -30,6 +36,8 @@
   btn.setAttribute("aria-label", LABEL);
   btn.setAttribute("aria-expanded", "false");
   btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+
+  if (inline) btn.insertAdjacentHTML("beforeend", "<span></span>"), btn.lastChild.textContent = LABEL;
 
   var panel = document.createElement("div");
   panel.className = id + "-p";
@@ -57,8 +65,16 @@
   });
 
   function mount() {
-    document.body.appendChild(btn); document.body.appendChild(panel);
+    if (inline) {
+      var w = document.createElement("div");
+      w.className = id + "-w";
+      w.appendChild(btn); w.appendChild(panel);
+      var box = document.createElement("div");
+      box.style.textAlign = "center";
+      box.appendChild(w);
+      s.parentNode.insertBefore(box, s);
+    } else { document.body.appendChild(btn); document.body.appendChild(panel); }
     if (s.dataset.open === "true" && window.innerWidth > 600) toggle(true);
   }
-  if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
+  if (inline || document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
 })();
