@@ -2,7 +2,8 @@
    <script src="https://digidayczech.github.io/qaro-widget/webview/webview.js"
      data-url="https://..." data-position="bottom-left" data-color="#1f1545" data-label="Otevřít" data-open="true"></script>
    data-open="true" = okno sa otvorí hneď po načítaní stránky (na mobile nie, tam by zakrylo celý web).
-   data-position="inline" = tlačidlo s textom sa vykreslí presne tam, kde je vložený script, okno sa otvorí absolútne pod ním. */
+   data-position="inline" = tlačidlo s textom sa vykreslí presne tam, kde je vložený script, okno sa otvorí absolútne pod ním.
+   data-offset="40" = pri inline posunie tlačidlo o 40 px nižšie (záporné číslo vyššie). */
 (function () {
   var s = document.currentScript;
   if (!s || !s.dataset.url) return;
@@ -71,6 +72,7 @@
       w.appendChild(btn); w.appendChild(panel);
       var box = document.createElement("div");
       box.style.textAlign = "center";
+      box.style.marginTop = (parseInt(s.dataset.offset, 10) || 0) + "px";
       box.appendChild(w);
       s.parentNode.insertBefore(box, s);
     } else { document.body.appendChild(btn); document.body.appendChild(panel); }
