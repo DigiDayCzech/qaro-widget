@@ -1,6 +1,7 @@
 /* QARO webview: plávajúce tlačidlo + okno s iframe.
    <script src="https://digidayczech.github.io/qaro-widget/webview/webview.js"
-     data-url="https://..." data-position="bottom-left" data-color="#1f1545" data-label="Otevřít"></script> */
+     data-url="https://..." data-position="bottom-left" data-color="#1f1545" data-label="Otevřít" data-open="true"></script>
+   data-open="true" = okno sa otvorí hneď po načítaní stránky (na mobile nie, tam by zakrylo celý web). */
 (function () {
   var s = document.currentScript;
   if (!s || !s.dataset.url) return;
@@ -55,6 +56,9 @@
     if (e.key === "Escape" && panel.classList.contains("open")) { toggle(false); btn.focus(); }
   });
 
-  function mount() { document.body.appendChild(btn); document.body.appendChild(panel); }
+  function mount() {
+    document.body.appendChild(btn); document.body.appendChild(panel);
+    if (s.dataset.open === "true" && window.innerWidth > 600) toggle(true);
+  }
   if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
 })();
